@@ -1,0 +1,87 @@
+\documentclass[12pt]{article}
+
+\usepackage[left=2.5cm,top=2.5cm,right=2.5cm,bottom=2.5cm]{geometry}
+
+%% Macros and packages go here
+
+\begin{document}
+\title{COMP0005 Algorithms: Group Coursework Report}
+\author{Group Number: XXX}
+\date{Academic year 2025/26}
+\maketitle
+
+
+
+\section{Experimental framework overview}
+\emph{(Section 1 should be about one page in length.)}
+
+\subsection{Framework design and architecture}
+
+The framework tests the insertion and search time as the number of nodes in a tree grows.
+The synthetic keys are generated in the $TestDataGenerator$.
+To suitably stress test the trees, four different methods of generating keys are used: sorted, reverse sorted, uniform random, and normal random. 
+Uniform random data is the best case, where keys are naturally self balancing [REF]. 
+Normal random data is the realistic average case, as due to Central Limit Theorem [REF] most natural data takes a normal distribution.
+Sorted and reverse sorted are the worst case, where the cost of rebalancing is most expressed [REF] due to always inserting on the very left or right of the tree.
+
+As the time to compare keys is a control variable, the framework ensures all keys are a constant string length.
+This makes the time to compare keys $O(k)$, where k is the length of the string. 
+As $k$ is constant, the cost of key comparisons is $O(1)$ with respect to the number of nodes in the tree, ensuring the theoretical relationship is still $O(logn)$.
+Strings are compared lexicographically, not numerically, so casting to string would change the intended distribution of random data. To maintain numerical ordering, truncating and left padding with 0's is used.
+The string length of 7 was chosen as it allows for $10^7$ unique keys, more than the number of nodes being inserted.
+
+The data is collected using the $ExperimentalFramework$. The algorithm to time inserts and searches simultaneously builds the tree while timing operations at fixed intervals of size $i$. 
+Operations are timed singularly, not cumulatively. At every interval, $k$ inserts and searches are timed for statistical significance, 
+with the key being deleted from the tree after every insert (not timed), so that the tree returns to the size being measured. 
+A search for a random key in, and not in the tree is performed, to measure both the average and worst cases to search for a key.
+The tree is built until it reaches a maximum size $n$, with $n$ being sufficiently large to measure the relationship between tree size and operation time.
+This process is repeated $m$ times, to minimize bias from OS processes such as scheduling.
+
+After collecting the data, it is processed using the $StatisticsFramework$.
+The framework calculates the log values of the tree's size as the theoretical $O(logn)$ complexity for insert and search would appear as a linear relation on a log plot.
+This allows the framework to calculate a value for PMCC, a quantitative measurement of linearity.
+The regression line is calculated so that its gradient can compare the hidden constants of different tree implementations.
+The RMSE is calculated to measure how close data points are to the regression line. The allows for reasoning about the predictability of each implementations performance.
+The residuals are plotted as it can reveal behaviours about a tree, 
+for example oscillations of residuals may indicate rebalancing at certain sizes, and a lack of such at other sizes.
+
+\subsection{Hardware/software setup for experiments}
+
+
+
+
+\section{Performance results}
+\emph{(Section 2 should be about two to two-and-a-half pages in length.)}
+
+\subsection{[First chosen data structure]}
+
+\subsection{[Second chosen data structure]}
+
+\subsection{[Third chosen data structure]}
+
+
+
+
+\section{Comparative assessment}
+\emph{(Section 3 should be about one to one-and-a-half pages in length.)}
+
+
+
+\section{Team contributions}
+\emph{(Section 4 should be no more than half a page in length. Express work share as a percentage totalling to $100$: for example, four students who all contributed equally should receive $25\%$.)}
+
+
+\vspace{1cm}
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+{\bf Name} & {\bf Portico ID} & {\bf Key contributions} & {\bf Work share (\%)} \\[1mm]
+\hline
+(name)    &  (number)  & (text) & ($xx\%$) \\\hline
+          &            &         &          \\
+%% more entries as needed
+\hline
+\end{tabular}
+
+
+\end{document}
