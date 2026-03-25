@@ -4,13 +4,17 @@
 
 %% Macros and packages go here
 
+\usepackage{enumitem}
+\usepackage[style=ieee, backend=biber]{biblatex}
+\usepackage{hyperref}
+
+\addbibresource{references.bib}
+
 \begin{document}
 \title{COMP0005 Algorithms: Group Coursework Report}
 \author{Group Number: XXX}
 \date{Academic year 2025/26}
 \maketitle
-
-
 
 \section{Experimental framework overview}
 \emph{(Section 1 should be about one page in length.)}
@@ -20,9 +24,9 @@
 The framework tests the insertion and search time as the number of nodes in a tree grows.
 The synthetic keys are generated in the $TestDataGenerator$.
 To suitably stress test the trees, four different methods of generating keys are used: sorted, reverse sorted, uniform random, and normal random. 
-Uniform random data is the best case, where keys are naturally self balancing [REF]. 
-Normal random data is the realistic average case, as due to Central Limit Theorem [REF] most natural data takes a normal distribution.
-Sorted and reverse sorted are the worst case, where the cost of rebalancing is most expressed [REF] due to always inserting on the very left or right of the tree.
+Uniform random data is the best case, where keys are naturally self balancing, (expected height of a vanilla BST is $O(logn)$ \cite{algorithms})
+Normal random data is the realistic average case, as due to Central Limit Theorem, natural data often takes a normal distribution.
+Sorted and reverse sorted are the worst case, where the cost of rebalancing is most expressed due to always inserting on the very left or right of the tree.
 
 As the time to compare keys is a control variable, the framework ensures all keys are a constant string length.
 This makes the time to compare keys $O(k)$, where k is the length of the string. 
@@ -42,13 +46,29 @@ The framework calculates the log values of the tree's size as the theoretical $O
 This allows the framework to calculate a value for PMCC, a quantitative measurement of linearity.
 The regression line is calculated so that its gradient can compare the hidden constants of different tree implementations.
 The RMSE is calculated to measure how close data points are to the regression line. The allows for reasoning about the predictability of each implementations performance.
-The residuals are plotted as it can reveal behaviours about a tree, 
-for example oscillations of residuals may indicate rebalancing at certain sizes, and a lack of such at other sizes.
+The residuals are plotted as a it verifies the $O(logn)$ relationship; residuals are expected to be random scattered about 0.
+
+Finally, graphs are processed using Matplotlib.
 
 \subsection{Hardware/software setup for experiments}
 
-
-
+The following system was used to run the framework:
+\begin{itemize}[noitemsep]
+    \item Laptop: Apple MacBook Pro
+    \item Chip: Apple M3 Pro; 11 Core CPU (5 performance (P) cores, 6 efficiency (E) cores), 14 core GPU
+    \item Memory: 18GB LPDDR5 unified memory
+    \item Memory bandwidth: 150 GB/s \cite{appleM3}
+    \item L1 Cache per P core: 192 KiB (instruction) + 128 KiB (data) \cite{wikiM3}
+    \item L1 Cache per E core: 128 KiB (instruction) + 64 KiB (data) \cite{wikiM3}
+    \item L2 Cache total: 16 MiB (P cores); 4 MiB (E cores) \cite{wikiM3}
+    \item System Level Cache: Not publicly available
+\end{itemize}
+The following software was used to run the framework:
+\begin{itemize}[noitemsep]
+    \item OS: MacOS Tahoe 26.3.1
+    \item Python Interpreter: 3.11.0
+    \item Python Libraries: timeit, random, matplotlib
+\end{itemize}
 
 \section{Performance results}
 \emph{(Section 2 should be about two to two-and-a-half pages in length.)}
@@ -83,5 +103,6 @@ for example oscillations of residuals may indicate rebalancing at certain sizes,
 \hline
 \end{tabular}
 
+\printbibliography
 
 \end{document}
