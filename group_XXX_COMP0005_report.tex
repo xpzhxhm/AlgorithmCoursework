@@ -7,6 +7,7 @@
 \usepackage{enumitem}
 \usepackage[style=ieee, backend=biber]{biblatex}
 \usepackage{hyperref}
+\usepackage{minted}
 
 \addbibresource{references.bib}
 
@@ -21,63 +22,65 @@
 
 \subsection{Framework design and architecture}
 
-The framework tests the insertion and search time as the number of nodes in a tree grows.
-The synthetic keys are generated in the $TestDataGenerator$.
-To suitably stress test the trees, four different methods of generating keys are used: sorted, reverse sorted, uniform random, and normal random. 
-Uniform random data is the best case, where keys are naturally self balancing, (expected height of a vanilla BST is $O(logn)$ \cite{algorithms})
-Normal random data is the realistic average case, as due to Central Limit Theorem, natural data often takes a normal distribution.
-Sorted and reverse sorted are the worst case, where the cost of rebalancing is most expressed due to always inserting on the very left or right of the tree.
+The framework empirically measures the asymptotic relationship between the operation (search, insertion) times and number of nodes in a balanced tree.
 
-As the time to compare keys is a control variable, the framework ensures all keys are a constant string length.
-This makes the time to compare keys $O(k)$, where k is the length of the string. 
-As $k$ is constant, the cost of key comparisons is $O(1)$ with respect to the number of nodes in the tree, ensuring the theoretical relationship is still $O(logn)$.
-Strings are compared lexicographically, not numerically, so casting to string would change the intended distribution of random data. To maintain numerical ordering, truncating and left padding with 0's is used.
+Synthetic keys are generated in the $TestDataGenerator$, which contains four generators to suitably stress test the trees:
+sequential (ascending, descending), and random (uniform, normal). 
+Uniform is the best case, as keys are naturally self balancing, (expected height of a vanilla BST is $O(logn)$ \cite{algorithms}).
+Normal is the average case, as due to Central Limit Theorem, natural data often takes a normal distribution.
+Sequential are the worst cases, where maximal rebalances occur due to always inserting on the left or right of the tree.
+
+The time to compare keys is a control variable, so the framework ensures all keys are a constant string length, $k$.
+This makes the time to compare keys $O(k)$. As $k$ is constant, the cost of key comparisons is $O(1)$ with respect to the number of nodes, $n$, in the tree.
+This ensures the theoretical time complexity of operation is still $O(logn)$.
+As keys are generated numerically and cast to strings, the intended random distributions change due to the difference in numerical and lexicographic order.
+To maintain numerical ordering, truncating (casting to Python $int$), casting to $str$, and left padding with 0's is used.
 The string length of 7 was chosen as it allows for $10^7$ unique keys, more than the number of nodes being inserted.
 
-The data is collected using the $ExperimentalFramework$. The algorithm to time inserts and searches simultaneously builds the tree while timing operations at fixed intervals of size $i$. 
-Operations are timed singularly, not cumulatively. At every interval, $k$ inserts and searches are timed for statistical significance, 
-with the key being deleted from the tree after every insert (not timed), so that the tree returns to the size being measured. 
-A search for a random key in, and not in the tree is performed, to measure both the average and worst cases to search for a key.
-The tree is built until it reaches a maximum size $n$, with $n$ being sufficiently large to measure the relationship between tree size and operation time.
-This process is repeated $m$ times, to minimize bias from OS processes such as scheduling.
+Data is collected using the $ExperimentalFramework$. 
+The algorithm builds $m$ trees up to the maximum size $n$ while measuring operation cost at intervals defined on a geometric progression, ratio $r=e^{ln(n)/data \ points}$.
+The geometric progression spreads the data points equally when plotting a log-graph.
+To minimize bias from OS processes and cache effects, $m$ is sufficiently large.
+To measure the asymptotic relationship, $n$ is sufficiently large.
+To be confident in our data, $r$ is sufficiently low.
+At each interval, an insertion is measured along with a search for a key inside and outside the tree.
 
 After collecting the data, it is processed using the $StatisticsFramework$.
-The framework calculates the log values of the tree's size as the theoretical $O(logn)$ complexity for insert and search would appear as a linear relation on a log plot.
-This allows the framework to calculate a value for PMCC, a quantitative measurement of linearity.
-The regression line is calculated so that its gradient can compare the hidden constants of different tree implementations.
-The RMSE is calculated to measure how close data points are to the regression line. The allows for reasoning about the predictability of each implementations performance.
-The residuals are plotted as a it verifies the $O(logn)$ relationship; residuals are expected to be random scattered about 0.
+Log values of $n$ at each interval are calculated as this transforms the log relationship to a linear one.
+The framework then calculates the PMCC, a quantitative measurement of linearity, to verify the relationship.
+The regression line is calculated as it can be used to reason about the hidden constants of different tree implementations.
+The RMSE is calculated as it allows for reasoning about the predictability of a tree implementation's performance.
+The residuals are plotted as they can reveal hidden mechanics about the trees (explored in section $2.1$).
 
 Finally, graphs are processed using Matplotlib.
 
 \subsection{Hardware/software setup for experiments}
 
-The following system was used to run the framework:
-\begin{itemize}[noitemsep]
-    \item Laptop: Apple MacBook Pro
-    \item Chip: Apple M3 Pro; 11 Core CPU (5 performance (P) cores, 6 efficiency (E) cores), 14 core GPU
-    \item Memory: 18GB LPDDR5 unified memory
-    \item Memory bandwidth: 150 GB/s \cite{appleM3}
-    \item L1 Cache per P core: 192 KiB (instruction) + 128 KiB (data) \cite{wikiM3}
-    \item L1 Cache per E core: 128 KiB (instruction) + 64 KiB (data) \cite{wikiM3}
-    \item L2 Cache total: 16 MiB (P cores); 4 MiB (E cores) \cite{wikiM3}
-    \item System Level Cache: Not publicly available
+Hardware:
+\begin{itemize}[nosep]
+    \item Laptop: Apple MacBook Pro M4 (10 core CPU, 10 core GPU)
+    \item Memory: 16GB LPDDR5X; 120 Gb$s^{-1}$ bandwidth \cite{wikiM4}
+    \item Cache (\mintinline{bash}!$ sysctl -a | grep perflevel!):
+        \begin{itemize}[nosep]
+            \item L1: 192 (instruction) + 128 KiB (data) per P core; 128 + 64 KiB per E core
+            \item L2: 16 MiB for P core cluster; 4 MiB for E core cluster
+        \end{itemize}
 \end{itemize}
-The following software was used to run the framework:
-\begin{itemize}[noitemsep]
+Software:
+\begin{itemize}[nosep]
     \item OS: MacOS Tahoe 26.3.1
-    \item Python Interpreter: 3.11.0
-    \item Python Libraries: timeit, random, matplotlib
+    \item Python Interpreter: 3.14
+    \item Python Libraries: timeit, random, matplotlib, math
 \end{itemize}
 
 \section{Performance results}
 \emph{(Section 2 should be about two to two-and-a-half pages in length.)}
 
-\subsection{[First chosen data structure]}
+\subsection{2-3 Tree}
 
-\subsection{[Second chosen data structure]}
+\subsection{LLRB BST}
 
-\subsection{[Third chosen data structure]}
+\subsection{AVL Tree}
 
 
 
