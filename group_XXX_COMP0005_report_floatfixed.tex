@@ -80,13 +80,11 @@ Software:
 
 
 \section{Performance results}
-\emph{(Section 2 should be about two to two-and-a-half pages in length.)}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{fig1_insert_uniform_comparison.png}
-    \caption{Comparison of insertion time under uniformly distributed keys. The 2-3 tree and LLRB tree both show lower insertion cost than
-  the AVL tree, while all three implementations exhibit approximately logarithmic growth with respect to tree size.}
+    \includegraphics[width=0.5\textwidth]{fig1_insert_uniform_comparison.png}
+    \caption{Comparison of insertion time under uniformly distributed keys.}
     \label{fig:1}
 \end{figure}
 
@@ -97,15 +95,14 @@ The main weakness of the 2-3 tree shown on the experiments is search cost. For s
 
 Ordered inputs reveal a second weakness, which is poor insertion predictability. Although the mean fitted slope remains competitive, the scatter becomes much larger and the logarithmic fit deteriorates sharply, with $R^2$ falling to about $0.50$ for sorted input and $0.43$ for reverse-sorted input. The spikes in the insertion graphs indicate that occasional cascades of split operations through several layers of the tree. Therefore, the 2-3 tree performs well when  average insertion throughput matters, but its search overhead and irregular insertion spikes make its runtime less predictable then other two implementations. 
 
-With sorted input, every insertion goes to the rightmost leaf. If that leaf is a 2-node, it absorbs the input, turning into a 3-node; if it is a 3-node, the leaf splits, turning back into a 2-node and passing its middle value upward. In the same way, if the parent node is itself a 2-node, it absorbs the middle value and turns into a 3-node, but if it is already a 3-node, it turns into a 2-node and passes on its own middle value. One can imagine, this causes a chain of splits that passes up the right-hand side of the tree, terminating at the first 2-node. More specifically, each insertion causes every 3-node in a vertical chain above (and including) the rightmost leaf to turn into a 2-node. The 2-node at the top of this chain becomes a 3-node. And since each connected 3-node causes a split operation, the insertion causes splits equal in number to number of connected 3-nodes. This works, in a way, like a binary counter. Treating 2-nodes as binary 0s, and 3-nodes as 1s, the number of splits caused by the Nth insertion is simply one less than the number of carries caused by adding one to N when written out in binary. For example, the 7th insertion uses 2 splits, because 7 in binary is 111 and adding 1 to 111 causes 3 carries, and 3 minus 1 is 2. 
+With sorted input, every insertion goes to the rightmost leaf. If that leaf is a 2-node, it absorbs the input, turning into a 3-node; if it is a 3-node, the leaf splits, turning back into a 2-node and passing its middle value upward. The same process then repeats upward, each 3-node on the right-most path causes another split, until the first 2-node is reached, which absorbs the promoted key and stops the chain. Hence, the cost of a sorted insertion is determined by the number of 3-nodes above the rightmost leaf. 
 
-This succinctly explains the observed ‘tree-like’ structure. The most expensive inserts for their size are those one less than a power of 2: numbers of the form 1, 11, 111 in binary. Splits only happen on odd insertions. Even numbers have no trailing ones in binary, and do not cause any splits. Half of all binary numbers end in 1. A quarter in 11, an eighth in 111, and so on. So, for every extra split, the spacing between inserts causing that number of splits doubles, explaining the apparent appearance of a binary tree pattern in our plot.
+This succinctly explains the observed ‘tree-like’ structure. If 2-nodes are viewed as binary 0s and 3-nodes as binary 1s, then sorted insertions behave like incrementing a binary counter, each trailing 1 corresponds to a split, and the first 0 becomes 1. As a result, expensive insertions occur at regular but increasingly sparse intervals, producing the layered spike pattern observed in the sorted-input graph.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{fig4_twothreetree_residuals_notes.png}
-    \caption{Representative 2-3 tree plots illustrating residual patterns. The step-like timing structure reflects discrete increases in
-  tree height, while oscillating residuals indicate changes in node composition as layers fill and split over time.}
+    \caption{Representative 2-3 tree plots illustrating residual patterns.}
     \label{fig:2}
 \end{figure}
 
@@ -118,14 +115,6 @@ This performance is consistent with the structure of LLRB tree. The LLRB tree im
 
 The limitation of the LLRB tree appears under reverse-ordered insertion. Under the reverse-sorted insertion graph, the fitted slope raises to about $3.03 \times 10^{-7}$ and $R^2$ drops to about $0.75$. This shows that although the trend remains logmarithmic, the sequence of rotations and color flips becomes more irregular when the inserted elements come with biased order. Overall, the LLRB tree shows the best performance in fast search and cheap insertion, but is less robust than AVL tree under the sorted inputs. 
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\textwidth]{fig2_search_in_uniform_comparison.png}
-    \caption{Comparison of successful search time under uniformly distributed keys. AVL and LLRB achieve very similar search performance,
-  whereas the 2-3 tree is consistently slower, despite following the same overall logarithmic trend.}
-    \label{fig:3}
-\end{figure}
-
 \FloatBarrier
 \subsection{AVL Tree}
 
@@ -137,9 +126,8 @@ A significant strength of AVL tree is robustness to adversarial input order. Und
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{fig3_insert_reverse_sorted_comparison.png}
-    \caption{Comparison of insertion time under reverse-sorted keys. The AVL tree remains the most stable implementation, while the LLRB
-  tree and especially the 2-3 tree show larger variance and more irregular re-balancing costs under highly ordered input.}
+    \includegraphics[width=0.45\textwidth]{fig3_insert_reverse_sorted_comparison.png}
+    \caption{Comparison of insertion time under reverse-sorted keys.}
     \label{fig:4}
 \end{figure}
 
