@@ -8,6 +8,8 @@
 \usepackage[style=ieee, backend=biber]{biblatex}
 \usepackage{hyperref}
 \usepackage{minted}
+\usepackage{float}
+\usepackage[section]{placeins}
 
 \usepackage{graphicx}
 
@@ -80,7 +82,7 @@ Software:
 \section{Performance results}
 \emph{(Section 2 should be about two to two-and-a-half pages in length.)}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{fig1_insert_uniform_comparison.png}
     \caption{Comparison of insertion time under uniformly distributed keys. The 2-3 tree and LLRB tree both show lower insertion cost than
@@ -99,7 +101,7 @@ With sorted input, every insertion goes to the rightmost leaf. If that leaf is a
 
 This succinctly explains the observed ‘tree-like’ structure. The most expensive inserts for their size are those one less than a power of 2: numbers of the form 1, 11, 111 in binary. Splits only happen on odd insertions. Even numbers have no trailing ones in binary, and do not cause any splits. Half of all binary numbers end in 1. A quarter in 11, an eighth in 111, and so on. So, for every extra split, the spacing between inserts causing that number of splits doubles, explaining the apparent appearance of a binary tree pattern in our plot.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{fig4_twothreetree_residuals_notes.png}
     \caption{Representative 2-3 tree plots illustrating residual patterns. The step-like timing structure reflects discrete increases in
@@ -107,6 +109,7 @@ This succinctly explains the observed ‘tree-like’ structure. The most expens
     \label{fig:2}
 \end{figure}
 
+\FloatBarrier
 \subsection{LLRB Tree}
 
 The LLRB tree is the most balanced overall implementation. Under uniform and normal inputs, its insertion slopes are about $2.38 \times 10^{-7}$, slightly above 2-3 tree and significantly below the AVL tree. Its search performance is also strong, for successful searches the fitted slopes are between $7.14 \times 10^{-8}$ and $8.06 \times 10^{-8}$, and for unsuccessful searches between $6.30 \times 10^{-8}$ and $8.89 \times 10^{-8}$.
@@ -115,7 +118,7 @@ This performance is consistent with the structure of LLRB tree. The LLRB tree im
 
 The limitation of the LLRB tree appears under reverse-ordered insertion. Under the reverse-sorted insertion graph, the fitted slope raises to about $3.03 \times 10^{-7}$ and $R^2$ drops to about $0.75$. This shows that although the trend remains logmarithmic, the sequence of rotations and color flips becomes more irregular when the inserted elements come with biased order. Overall, the LLRB tree shows the best performance in fast search and cheap insertion, but is less robust than AVL tree under the sorted inputs. 
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{fig2_search_in_uniform_comparison.png}
     \caption{Comparison of successful search time under uniformly distributed keys. AVL and LLRB achieve very similar search performance,
@@ -123,6 +126,7 @@ The limitation of the LLRB tree appears under reverse-ordered insertion. Under t
     \label{fig:3}
 \end{figure}
 
+\FloatBarrier
 \subsection{AVL Tree}
 
 The AVL tree has the most stable logarithmic behavior, but it comes with the highest insertion cost. Under uniform and normal inputs, the fitted insertion slopes are about $4.04 \times 10^{-7}$ and $4.02 \times 10^{-7}$, which are significantly higher than LLRB tree and 2-3 trees. Under the sorted and reverse-sorted inputs, AVL tree's insertion slopes fall down to about $3.75 \times 10^{-7}$ and $3.63 \times 10^{-7}$, which means that AVL tree is inserting slower than the other two implementations. This is consistent with its implementation, which re-calculate heights and may perform one or two rotations on the way back up after every insertion.
@@ -131,7 +135,7 @@ In contrast, search in the AVL tree is consistently efficient and predictable. S
 
 A significant strength of AVL tree is robustness to adversarial input order. Under reverse-sorted inputs the AVL insertion fit still has $R^2 \approx 0.97$, which is much better than LLRB ($R^2 \approx 0.75$) and the 2-3 tree ($R^2 \approx 0.43$). 
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{fig3_insert_reverse_sorted_comparison.png}
     \caption{Comparison of insertion time under reverse-sorted keys. The AVL tree remains the most stable implementation, while the LLRB
@@ -139,7 +143,7 @@ A significant strength of AVL tree is robustness to adversarial input order. Und
     \label{fig:4}
 \end{figure}
 
-
+\FloatBarrier
 \section{Comparative assessment}
 \emph{(Section 3 should be about one to one-and-a-half pages in length.)}
 
